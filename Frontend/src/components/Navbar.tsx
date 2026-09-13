@@ -1,0 +1,101 @@
+"use client";
+
+
+
+import Link from "next/link";
+
+import { usePathname } from "next/navigation";
+
+import { useAuth } from "@/context/AuthContext";
+
+import { useCart } from "@/context/CartContext";
+
+
+
+export default function Navbar() {
+
+  const { user, logout } = useAuth();
+
+  const { itemCount } = useCart();
+
+  const pathname = usePathname();
+
+
+
+  const linkClass = (path: string) =>
+
+    pathname === path ? "nav-link active" : "nav-link";
+
+
+
+  return (
+
+    <header className="navbar">
+
+      <div className="container navbar-inner">
+
+        <Link href="/" className="brand">
+
+          <span className="brand-icon">🍽️</span>
+
+          FoodApp
+
+        </Link>
+
+
+
+        {user && (
+
+          <nav className="nav-links">
+
+            <Link href="/" className={linkClass("/")}>Restaurants</Link>
+
+            <Link href="/orders" className={linkClass("/orders")}>My Orders</Link>
+
+            <Link href="/profile" className={linkClass("/profile")}>Profile</Link>
+
+            {itemCount > 0 && (
+
+              <span className="cart-badge">{itemCount} in cart</span>
+
+            )}
+
+          </nav>
+
+        )}
+
+
+
+        <div className="navbar-actions">
+
+          {user ? (
+
+            <>
+
+              <span className="user-greeting">Hi, {user.name}</span>
+
+              <button className="btn btn-secondary" onClick={logout}>
+
+                Logout
+
+              </button>
+
+            </>
+
+          ) : (
+
+            <></>
+
+          )}
+
+        </div>
+
+      </div>
+
+    </header>
+
+  );
+
+}
+
+
