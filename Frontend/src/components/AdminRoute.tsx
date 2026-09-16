@@ -3,20 +3,26 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { isAdmin } from "@/lib/roles";
 
-export default function ProtectedRoute({
+export default function AdminRoute({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { token, loading } = useAuth();
+  const { user, token, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!loading && !token) {
       router.replace("/login");
+      return;
     }
-  }, [loading, token, router]);
+
+    if (!loading && user && !isAdmin(user)) {
+      router.replace("/");
+    }
+  }, [loading, token, user, router]);
 
   if (loading) {
     return (
@@ -27,7 +33,7 @@ export default function ProtectedRoute({
     );
   }
 
-  if (!token) {
+  if (!token || !user || !isAdmin(user)) {
     return null;
   }
 

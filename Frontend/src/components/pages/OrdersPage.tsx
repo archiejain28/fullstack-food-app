@@ -3,14 +3,8 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { formatToIST } from "@/lib/date";
-import type { Order, OrderItem } from "@/types";
-
-function getOrderTotal(items: OrderItem[] = []): number {
-  return items.reduce(
-    (sum, item) => sum + Number(item.price) * item.quantity,
-    0,
-  );
-}
+import { getOrderTotal } from "@/lib/order";
+import type { Order } from "@/types";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);

@@ -11,7 +11,8 @@ const userController = new UserController();
  * /users/register:
  *   post:
  *     summary: Register a new user
- *     security: []
+ *     security:
+ *       - bearerAuth: []
  *     tags:
  *       - Users
  *     requestBody:
@@ -40,6 +41,21 @@ router.post("/register", userController.register);
 
 /**
  * @swagger
+ * /users/register/google:
+ *   post:
+ *     summary: Complete signup for new Google users
+ *     security: []
+ *     tags:
+ *       - Users
+ *     responses:
+ *       201:
+ *         description: Account created and login token returned
+ */
+
+router.post("/register/google", userController.registerFromGoogle);
+
+/**
+ * @swagger
  * /users:
  *   get:
  *     summary: get users list
@@ -52,7 +68,7 @@ router.post("/register", userController.register);
  *         description: User fetched successfully
  */
 
-router.get("/", authMiddleware, userController.getUsers);
+router.get("/", authMiddleware, isLoggedUserAdmin, userController.getUsers);
 
 /**
  * @swagger
@@ -69,6 +85,26 @@ router.get("/", authMiddleware, userController.getUsers);
  */
 
 router.get("/profile", authMiddleware, userController.getUserProfile);
+
+/**
+ * @swagger
+ * /users/profile/complete:
+ *   patch:
+ *     summary: Complete profile after Google sign-in
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - User Profile
+ *     responses:
+ *       200:
+ *         description: Profile completed successfully
+ */
+
+router.patch(
+  "/profile/complete",
+  authMiddleware,
+  userController.completeProfile,
+);
 
 /**
  * @swagger

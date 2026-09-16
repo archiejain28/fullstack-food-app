@@ -12,13 +12,21 @@ import type { CartItem } from "@/types";
 
 type CartState = {
   restaurantId: number | null;
+  restaurantName: string | null;
   items: CartItem[];
 };
 
 type CartContextValue = {
   restaurantId: number | null;
+  restaurantName: string | null;
   items: CartItem[];
-  addItem: (restaurantId: number, item: CartItem) => void;
+  addItem: (
+    restaurantId: number,
+    item: CartItem,
+    restaurantName: string,
+    replaceExisting?: boolean,
+  ) => void;
+  hasItemsFromDifferentRestaurant: (restaurantId: number) => boolean;
   updateQuantity: (itemId: number, quantity: number) => void;
   removeItem: (itemId: number) => void;
   clearCart: () => void;
@@ -34,6 +42,7 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartState>({
     restaurantId: null,
+    restaurantName: null,
     items: [],
   });
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -41,31 +50,54 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
-  const addItem = useCallback((newRestaurantId: number, item: CartItem) => {
-    setCart((current) => {
-      const currentItems =
-        current.restaurantId && current.restaurantId !== newRestaurantId
-          ? []
-          : current.items;
+  const hasItemsFromDifferentRestaurant = useCallback(
+    (restaurantId: number) =>
+      cart.restaurantId !== null &&
+      cart.restaurantId !== restaurantId &&
+      cart.items.length > 0,
+    [cart.restaurantId, cart.items.length],
+  );
 
-      const existing = currentItems.find(
-        (cartItem) => cartItem.itemId === item.itemId,
-      );
+  const addItem = useCallback(
+    (
+      newRestaurantId: number,
+      item: CartItem,
+      restaurantName: string,
+      replaceExisting = false,
+    ) => {
+      setCart((current) => {
+        const switchingRestaurant =
+          current.restaurantId !== null &&
+          current.restaurantId !== newRestaurantId &&
+          current.items.length > 0;
 
-      const nextItems = existing
-        ? currentItems.map((cartItem) =>
-            cartItem.itemId === item.itemId
-              ? { ...cartItem, quantity: cartItem.quantity + item.quantity }
-              : cartItem,
-          )
-        : [...currentItems, item];
+        if (switchingRestaurant && !replaceExisting) {
+          return current;
+        }
 
-      return {
-        restaurantId: newRestaurantId,
-        items: nextItems,
-      };
-    });
-  }, []);
+        const currentItems = switchingRestaurant ? [] : current.items;
+
+        const existing = currentItems.find(
+          (cartItem) => cartItem.itemId === item.itemId,
+        );
+
+        const nextItems = existing
+          ? currentItems.map((cartItem) =>
+              cartItem.itemId === item.itemId
+                ? { ...cartItem, quantity: cartItem.quantity + item.quantity }
+                : cartItem,
+            )
+          : [...currentItems, item];
+
+        return {
+          restaurantId: newRestaurantId,
+          restaurantName,
+          items: nextItems,
+        };
+      });
+    },
+    [],
+  );
 
   const updateQuantity = useCallback((itemId: number, quantity: number) => {
     setCart((current) => {
@@ -93,7 +125,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const clearCart = useCallback(() => {
-    setCart({ restaurantId: null, items: [] });
+    setCart({ restaurantId: null, restaurantName: null, items: [] });
   }, []);
 
   const total = useMemo(
@@ -109,8 +141,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       restaurantId: cart.restaurantId,
+      restaurantName: cart.restaurantName,
       items: cart.items,
       addItem,
+      hasItemsFromDifferentRestaurant,
       updateQuantity,
       removeItem,
       clearCart,
@@ -122,8 +156,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }),
     [
       cart.restaurantId,
+      cart.restaurantName,
       cart.items,
       addItem,
+      hasItemsFromDifferentRestaurant,
       updateQuantity,
       removeItem,
       clearCart,

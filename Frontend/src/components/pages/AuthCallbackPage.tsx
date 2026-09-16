@@ -39,13 +39,9 @@ function AuthCallbackContent() {
 
 
     login(token)
-
       .then(() => router.replace("/"))
-
       .catch(() => {
-
         setError("Failed to complete login. Please try again.");
-
       });
 
   }, [searchParams, login, router]);

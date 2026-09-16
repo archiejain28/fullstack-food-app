@@ -37,6 +37,35 @@ async function request<T>(
 
 export const api = {
   getProfile: () => request<User>("/users/profile"),
+  register: (payload: {
+    name: string;
+    email: string;
+    address: string;
+    phone_no: string;
+    role: string;
+  }) =>
+    request<{ status: boolean; message: string }>("/users/register", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  registerFromGoogle: (
+    signupToken: string,
+    payload: {
+      name: string;
+      email: string;
+      address: string;
+      phone_no: string;
+      role: string;
+    },
+  ) =>
+    request<{ status: boolean; message: string; token: string }>(
+      "/users/register/google",
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${signupToken}` },
+        body: JSON.stringify(payload),
+      },
+    ),
   updateAddress: (address: string) =>
     request<{ message: string }>("/users/profile/updateAddress", {
       method: "PATCH",
@@ -62,6 +91,18 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   getMyOrders: () => request<Order[]>("/orders/myOrders"),
+  getAllOrders: () => request<Order[]>("/orders/all"),
+  updateOrderStatus: (orderId: number, newStatus: string) =>
+    request<{ message: string }>(`/orders/updateOrderStatus/${orderId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ newStatus }),
+    }),
+  getUsers: () => request<User[]>("/users"),
+  updateUserRole: (userId: number, newRole: string) =>
+    request<{ message: string }>(`/users/admin/updateUserRole/${userId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ newRole }),
+    }),
 };
 
 export const AUTH_URL = `${API_BASE}/auth/google`;

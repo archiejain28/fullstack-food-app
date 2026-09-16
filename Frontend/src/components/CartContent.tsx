@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/lib/api";
@@ -12,7 +11,8 @@ type CartContentProps = {
 
 export default function CartContent({ onOrderPlaced }: CartContentProps) {
   const router = useRouter();
-  const { items, restaurantId, total, clearCart, updateQuantity } = useCart();
+  const { items, restaurantId, restaurantName, total, clearCart, updateQuantity } =
+    useCart();
   const [placingOrder, setPlacingOrder] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -54,6 +54,13 @@ export default function CartContent({ onOrderPlaced }: CartContentProps) {
       {error && <div className="alert alert-error">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
+      {restaurantName && (
+        <p className="cart-restaurant-name">
+          <span className="cart-restaurant-label">Restaurant</span>
+          {restaurantName}
+        </p>
+      )}
+
       <ul className="cart-list">
         {items.map((item) => (
           <li key={item.itemId} className="cart-item">
@@ -88,15 +95,6 @@ export default function CartContent({ onOrderPlaced }: CartContentProps) {
         <strong>Total</strong>
         <strong>₹{total.toFixed(2)}</strong>
       </div>
-
-      {restaurantId && (
-        <Link
-          href={`/restaurant/${restaurantId}`}
-          className="btn btn-secondary btn-block cart-menu-link"
-        >
-          View Menu
-        </Link>
-      )}
 
       <button
         className="btn btn-primary btn-block"

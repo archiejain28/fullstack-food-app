@@ -1,18 +1,34 @@
 import type { Request, Response } from "express";
+import jwt from "jsonwebtoken";
 import UserModel from "../model/user.model.ts";
 import type { UserType } from "../types/user.types.ts";
-import { userSchema } from "../validators/user.validator.ts";
+import {
+  completeProfileSchema,
+  registerSchema,
+} from "../validators/user.validator.ts";
 
 export default class UserController {
   userModel = new UserModel();
 
   register = async (req: Request, res: Response) => {
     try {
-      const { value, error } = userSchema.validate(req.body);
-      const { name, address, phone_no, role, email } = value;
-
+      const { value, error } = registerSchema.validate(req.body);
       if (error) {
-        throw new Error(error?.details[0]?.message);
+        return res.status(400).json({
+          status: false,
+          message: error.details[0]?.message,
+        });
+      }
+
+      const { name, address, phone_no, role, email } = value;
+      const existingUser = await this.userModel.fetchUserByEmail(email);
+
+      if (existingUser) {
+        return res.status(409).json({
+          status: false,
+          message:
+            "This email is already registered. Please sign in with Google.",
+        });
       }
 
       const user = await this.userModel.createUser({
@@ -21,9 +37,14 @@ export default class UserController {
         address,
         phone_no,
         role,
-      }); // to access instance's method/properties, we need to use this keyword
+      });
 
-      res.status(201).json(user);
+      res.status(201).json({
+        status: true,
+        message:
+          "Account created successfully. Please sign in with Google using the same email.",
+        data: user,
+      });
     } catch (error) {
       if (error instanceof Error) {
         return res.status(500).json({
@@ -34,6 +55,129 @@ export default class UserController {
       res.status(500).json({
         status: false,
         message: "Something went wrong",
+      });
+    }
+  };
+
+  registerFromGoogle = async (req: Request, res: Response) => {
+    try {
+      const signupToken =
+        (req.headers.authorization?.split(" ")[1] as string) ||
+        (req.body.signupToken as string);
+
+      if (!signupToken) {
+        return res.status(401).json({
+          status: false,
+          message: "Signup token is required",
+        });
+      }
+
+      const decoded = jwt.verify(
+        signupToken,
+        process.env.JWT_SECRET!,
+      ) as { email: string; name: string; isNewUser?: boolean };
+
+      if (!decoded.isNewUser) {
+        return res.status(401).json({
+          status: false,
+          message: "Invalid signup token",
+        });
+      }
+
+      const { value, error } = registerSchema.validate(req.body);
+      if (error) {
+        return res.status(400).json({
+          status: false,
+          message: error.details[0]?.message,
+        });
+      }
+
+      const { name, address, phone_no, role, email } = value;
+
+      if (email !== decoded.email) {
+        return res.status(400).json({
+          status: false,
+          message: "Email must match your Google account",
+        });
+      }
+
+      const existingUser = await this.userModel.fetchUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({
+          status: false,
+          message: "Account already exists. Please sign in with Google.",
+        });
+      }
+
+      const user = await this.userModel.createUser({
+        name,
+        email,
+        address,
+        phone_no,
+        role,
+      });
+
+      const token = jwt.sign(
+        {
+          user_id: user.user_id,
+          email: user.email,
+          role: user.role,
+        },
+        process.env.JWT_SECRET!,
+        { expiresIn: "1d" },
+      );
+
+      res.status(201).json({
+        status: true,
+        message: "Account created successfully",
+        token,
+        data: user,
+      });
+    } catch (error) {
+      if (error instanceof jwt.JsonWebTokenError) {
+        return res.status(401).json({
+          status: false,
+          message: "Signup session expired. Please sign in with Google again.",
+        });
+      }
+
+      res.status(500).json({
+        status: false,
+        message: "Something went wrong while creating your account",
+      });
+    }
+  };
+
+  completeProfile = async (req: Request, res: Response) => {
+    try {
+      const { value, error } = completeProfileSchema.validate(req.body);
+      if (error) {
+        return res.status(400).json({
+          status: false,
+          message: error.details[0]?.message,
+        });
+      }
+
+      const { email } = req.user as UserType;
+      const { name, address, phone_no, role } = value;
+
+      const updatedProfile = await this.userModel.completeUserProfile(
+        email,
+        name,
+        address,
+        phone_no,
+        role,
+      );
+
+      res.status(200).json({
+        status: true,
+        message: "Profile completed successfully",
+        data: updatedProfile,
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: false,
+        message: "Something went wrong while completing profile",
       });
     }
   };

@@ -76,6 +76,39 @@ export default class OrderModel {
     }
   };
 
+  fetchAllOrders = async () => {
+    try {
+      const orderDetails = await pool.query(
+        `SELECT o.*, r.name AS restaurant_name, u.name AS user_name, u.email AS user_email
+         FROM orders o
+         JOIN restaurants r ON r.restaurant_id = o.restaurant_id
+         JOIN users u ON u.user_id = o.user_id
+         ORDER BY o.order_id DESC`,
+      );
+
+      const orders = await Promise.all(
+        orderDetails.rows.map(async (order) => {
+          const orderItems = await pool.query(
+            `SELECT oi.*, mi.name
+             FROM order_items oi
+             JOIN menu_items mi ON mi.item_id = oi.item_id
+             WHERE oi.order_id = $1`,
+            [order.order_id],
+          );
+
+          return {
+            ...order,
+            items: orderItems.rows,
+          };
+        }),
+      );
+
+      return orders;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   fetchUserOrder = async (userId?: number) => {
     try {
       const query = `SELECT * from orders where user_id=${userId}`;

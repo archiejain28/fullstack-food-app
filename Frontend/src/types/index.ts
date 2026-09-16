@@ -40,6 +40,8 @@ export type Order = {
   user_id: number;
   restaurant_id: number;
   restaurant_name?: string;
+  user_name?: string;
+  user_email?: string;
   created_at: string;
   status: string;
   items?: OrderItem[];

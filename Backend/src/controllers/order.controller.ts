@@ -84,6 +84,18 @@ export default class OrderController {
     }
   };
 
+  fetchAllOrders = async (_req: Request, res: Response) => {
+    try {
+      const data = await this.orderModel.fetchAllOrders();
+      res.status(200).json(data);
+    } catch (error) {
+      res.status(500).json({
+        message: "Error while fetching orders",
+        error: error instanceof Error ? error.message : error,
+      });
+    }
+  };
+
   updateOrderStatus = async (req: Request, res: Response) => {
     try {
       const { newStatus } = req.body;

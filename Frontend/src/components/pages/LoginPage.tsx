@@ -1,4 +1,4 @@
-import { AUTH_URL, DEV_AUTH_URL } from "@/lib/api";
+import { AUTH_URL } from "@/lib/api";
 
 export default function LoginPage() {
   return (
@@ -14,6 +14,9 @@ export default function LoginPage() {
           <a href={AUTH_URL} className="btn btn-primary btn-block">
             Continue with Google
           </a>
+          <p className="login-hint muted">
+            First-time users will complete their profile after signing in.
+          </p>
         </div>
       </div>
     </div>

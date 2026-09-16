@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
+import { isAdmin } from "@/lib/roles";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -30,6 +31,16 @@ export default function Navbar() {
             <Link href="/profile" className={linkClass("/profile")}>
               Profile
             </Link>
+            {isAdmin(user) && (
+              <>
+                <Link href="/admin/users" className={linkClass("/admin/users")}>
+                  Users
+                </Link>
+                <Link href="/admin/orders" className={linkClass("/admin/orders")}>
+                  Manage Orders
+                </Link>
+              </>
+            )}
           </nav>
         )}
 

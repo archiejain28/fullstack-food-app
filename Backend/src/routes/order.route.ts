@@ -61,6 +61,27 @@ router.get("/myOrders", authMiddleware, orderController.fetchMyOrders);
 
 /**
  * @swagger
+ * /orders/all:
+ *   get:
+ *     summary: list of all orders (admin)
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Order
+ *     responses:
+ *       200:
+ *         description: All orders fetched successfully
+ */
+
+router.get(
+  "/all",
+  authMiddleware,
+  isLoggedUserAdmin,
+  orderController.fetchAllOrders,
+);
+
+/**
+ * @swagger
  * /orders/updateOrderStatus/{id}:
  *   patch:
  *     summary: Update Order Status
