@@ -50,7 +50,7 @@ export const api = {
   getRestaurants: () =>
     request<{ status: boolean; message: Restaurant[] }>("/restaurant/list"),
   getMenu: (restaurantId: number) =>
-    request<{ status: boolean; message: MenuItem[] }>(
+    request<{ status: boolean; restaurant: Restaurant; message: MenuItem[] }>(
       `/restaurant/${restaurantId}`,
     ),
   createOrder: (payload: {

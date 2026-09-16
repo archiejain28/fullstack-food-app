@@ -12,6 +12,8 @@ const orderController = new OrderController();
  * /orders:
  *   post:
  *     summary: Create a order
+ *     security:
+ *       - bearerAuth: []
  *     tags:
  *       - Order
  *     requestBody:
@@ -46,6 +48,8 @@ router.post("/", authMiddleware, orderController.createOrder);
  * /orders/myOrders:
  *   get:
  *     summary: list of myorder
+ *     security:
+ *       - bearerAuth: []
  *     tags:
  *       - Order
  *     responses:
@@ -60,6 +64,8 @@ router.get("/myOrders", authMiddleware, orderController.fetchMyOrders);
  * /orders/updateOrderStatus/{id}:
  *   patch:
  *     summary: Update Order Status
+ *     security:
+ *       - bearerAuth: []
  *     tags:
  *       - Order
  *     parameters:

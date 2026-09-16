@@ -34,7 +34,15 @@ const options = {
 const swaggerSpec = swaggerJsdoc(options);
 function swaggerDocs(app: Application) {
   // Swagger Page
-  app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.use(
+    "/docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
+    }),
+  );
   // Documentation in JSON format
   app.get("/docs.json", (req, res) => {
     res.setHeader("Content-Type", "application/json");

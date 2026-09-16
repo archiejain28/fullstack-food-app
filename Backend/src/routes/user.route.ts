@@ -11,6 +11,7 @@ const userController = new UserController();
  * /users/register:
  *   post:
  *     summary: Register a new user
+ *     security: []
  *     tags:
  *       - Users
  *     requestBody:
@@ -35,13 +36,15 @@ const userController = new UserController();
  *         description: User created successfully
  */
 
-router.post("/register", authMiddleware, userController.register);
+router.post("/register", userController.register);
 
 /**
  * @swagger
  * /users:
  *   get:
  *     summary: get users list
+ *     security:
+ *       - bearerAuth: []
  *     tags:
  *       - Users
  *     responses:
@@ -56,6 +59,8 @@ router.get("/", authMiddleware, userController.getUsers);
  * /users/profile:
  *   get:
  *     summary: get my profile
+ *     security:
+ *       - bearerAuth: []
  *     tags:
  *       - User Profile
  *     responses:
@@ -70,6 +75,8 @@ router.get("/profile", authMiddleware, userController.getUserProfile);
  * /users/profile/updateAddress:
  *   patch:
  *     summary: Update User Address
+ *     security:
+ *       - bearerAuth: []
  *     tags:
  *       - User Profile
  *     requestBody:
@@ -97,6 +104,8 @@ router.patch(
  * /users/profile/updatePhoneNumber:
  *   patch:
  *     summary: Update User Phone Number
+ *     security:
+ *       - bearerAuth: []
  *     tags:
  *       - User Profile
  *     requestBody:
@@ -124,6 +133,8 @@ router.patch(
  * /users/admin/updateUserRole/{id}:
  *   patch:
  *     summary: Update User Role
+ *     security:
+ *       - bearerAuth: []
  *     tags:
  *       - Admin
  *     parameters:

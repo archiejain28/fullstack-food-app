@@ -21,7 +21,7 @@ export const createTables = async () =>{
          order_id SERIAL PRIMARY KEY,
          user_id INT,
          restaurant_id INT,
-         created_at DATE DEFAULT CURRENT_DATE,
+         created_at TIMESTAMPTZ DEFAULT NOW(),
          status VARCHAR(50),
          FOREIGN KEY (user_id) REFERENCES users(user_id),
          FOREIGN KEY (restaurant_id) REFERENCES restaurants(restaurant_id)
@@ -42,6 +42,25 @@ export const createTables = async () =>{
          FOREIGN KEY (restaurant_id) REFERENCES restaurants(restaurant_id)
         );`
      )
+     await pool.query(`
+       DO $$
+       BEGIN
+         IF EXISTS (
+           SELECT 1
+           FROM information_schema.columns
+           WHERE table_schema = 'public'
+             AND table_name = 'orders'
+             AND column_name = 'created_at'
+             AND data_type = 'date'
+         ) THEN
+           ALTER TABLE orders
+             ALTER COLUMN created_at TYPE TIMESTAMPTZ
+             USING (created_at::timestamp AT TIME ZONE 'Asia/Kolkata');
+           ALTER TABLE orders
+             ALTER COLUMN created_at SET DEFAULT NOW();
+         END IF;
+       END $$;
+     `);
    }catch(error){
     console.error('Error creating tables:', error);
    }

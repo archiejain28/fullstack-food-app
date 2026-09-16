@@ -39,6 +39,7 @@ export type Order = {
   order_id: number;
   user_id: number;
   restaurant_id: number;
+  restaurant_name?: string;
   created_at: string;
   status: string;
   items?: OrderItem[];

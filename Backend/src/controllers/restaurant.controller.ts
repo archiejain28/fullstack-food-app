@@ -23,11 +23,21 @@ export default class RestaurantController {
 
   getMenuListOfRestaurant = async (req:Request, res: Response) => {
     try {
-      const id = req.params?.id;
-      const response = await this.restaurantModel.fetchMenuItemsforRestaurant(Number(id));
+      const id = Number(req.params?.id);
+      const restaurant = await this.restaurantModel.fetchRestaurantById(id);
+
+      if (!restaurant) {
+        return res.status(404).json({
+          status: false,
+          message: "Restaurant not found",
+        });
+      }
+
+      const response = await this.restaurantModel.fetchMenuItemsforRestaurant(id);
 
       res.status(200).json({
         status: true,
+        restaurant,
         message: response,
       });
     } catch (error) {

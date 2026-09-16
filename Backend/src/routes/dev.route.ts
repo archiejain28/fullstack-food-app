@@ -5,6 +5,21 @@ import UserModel from "../model/user.model.ts";
 const router = express.Router();
 const userModel = new UserModel();
 
+/**
+ * @swagger
+ * /auth/dev/login:
+ *   get:
+ *     summary: Dev login (returns JWT via redirect)
+ *     security: []
+ *     tags:
+ *       - Auth
+ *     responses:
+ *       302:
+ *         description: Redirects to frontend with JWT token
+ *       404:
+ *         description: Not available in production
+ */
+
 router.get("/login", async (req, res) => {
   if (process.env.NODE_ENV === "production") {
     res.status(404).json({ message: "Not found" });

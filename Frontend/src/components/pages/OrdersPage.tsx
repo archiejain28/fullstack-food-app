@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import type { Order } from "@/types";
+import { formatToIST } from "@/lib/date";
+import type { Order, OrderItem } from "@/types";
+
+function getOrderTotal(items: OrderItem[] = []): number {
+  return items.reduce(
+    (sum, item) => sum + Number(item.price) * item.quantity,
+    0,
+  );
+}
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -52,19 +60,28 @@ export default function OrdersPage() {
                 </span>
               </div>
               <div className="order-details">
-                <p><strong>Restaurant ID:</strong> {order.restaurant_id}</p>
-                <p><strong>Order Date:</strong> {order.created_at}</p>
+                <p>
+                  <strong>Restaurant:</strong>{" "}
+                  {order.restaurant_name ?? `ID ${order.restaurant_id}`}
+                </p>
+                <p><strong>Order Date:</strong> {formatToIST(order.created_at)}</p>
                 {order.items && order.items.length > 0 && (
-                  <ul className="cart-list">
-                    {order.items.map((item) => (
-                      <li key={item.item_id} className="cart-item">
-                        <span>{item.name}</span>
-                        <span>
-                          {item.quantity} × ₹{item.price}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                  <>
+                    <ul className="cart-list">
+                      {order.items.map((item) => (
+                        <li key={item.item_id} className="cart-item">
+                          <span>{item.name}</span>
+                          <span>
+                            {item.quantity} × ₹{Number(item.price).toFixed(2)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="cart-total">
+                      <strong>Total</strong>
+                      <strong>₹{getOrderTotal(order.items).toFixed(2)}</strong>
+                    </div>
+                  </>
                 )}
               </div>
             </div>

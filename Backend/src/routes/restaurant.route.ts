@@ -11,6 +11,8 @@ const restaurantController = new RestaurantController();
  * /restaurant/list:
  *   get:
  *     summary: list of restaurant
+ *     security:
+ *       - bearerAuth: []
  *     tags:
  *       - Restaurant
  *     responses:
@@ -25,6 +27,8 @@ router.get("/list", authMiddleware, restaurantController.getRestaurantList);
  * /restaurant/{id}:
  *   get:
  *     summary: get restaurant's menu list
+ *     security:
+ *       - bearerAuth: []
  *     tags:
  *       - Restaurant
  *     parameters:

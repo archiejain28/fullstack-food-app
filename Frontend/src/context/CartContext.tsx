@@ -24,6 +24,9 @@ type CartContextValue = {
   clearCart: () => void;
   total: number;
   itemCount: number;
+  drawerOpen: boolean;
+  openDrawer: () => void;
+  closeDrawer: () => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -33,6 +36,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     restaurantId: null,
     items: [],
   });
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const openDrawer = useCallback(() => setDrawerOpen(true), []);
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
   const addItem = useCallback((newRestaurantId: number, item: CartItem) => {
     setCart((current) => {
@@ -109,6 +116,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       clearCart,
       total,
       itemCount,
+      drawerOpen,
+      openDrawer,
+      closeDrawer,
     }),
     [
       cart.restaurantId,
@@ -119,6 +129,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       clearCart,
       total,
       itemCount,
+      drawerOpen,
+      openDrawer,
+      closeDrawer,
     ],
   );
 

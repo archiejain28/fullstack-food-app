@@ -15,7 +15,7 @@ export default class OrderModel {
 
     try {
       await client.query("BEGIN");
-      const query1 = `INSERT into orders (user_id,restaurant_id,status) values ($1,$2,'inProgress') returning *`;
+      const query1 = `INSERT into orders (user_id, restaurant_id, status, created_at) values ($1, $2, 'inProgress', NOW()) returning *`;
       const orderRes = await client.query(query1, [userId, restaurantId]);
       const query2 = `INSERT into order_items (order_id,item_id,quantity,price) values ($1,$2,$3,$4) returning *`;
       const orderItemRes = await Promise.all(
@@ -45,7 +45,11 @@ export default class OrderModel {
   fetchUserOrders = async (userId: number) => {
     try {
       const orderDetails = await pool.query(
-        `SELECT * FROM orders WHERE user_id = $1 ORDER BY order_id DESC`,
+        `SELECT o.*, r.name AS restaurant_name
+         FROM orders o
+         JOIN restaurants r ON r.restaurant_id = o.restaurant_id
+         WHERE o.user_id = $1
+         ORDER BY o.order_id DESC`,
         [userId],
       );
 

@@ -11,6 +11,18 @@ export default class RestaurantModel {
     }
   };
 
+  fetchRestaurantById = async (id: number) => {
+    try {
+      const query = `SELECT restaurant_id, name, address, phone_no
+        FROM restaurants
+        WHERE restaurant_id = $1`;
+      const res = await pool.query(query, [id]);
+      return res.rows[0];
+    } catch (error) {
+      throw error;
+    }
+  };
+
   fetchMenuItemsforRestaurant = async (id?: number) => {
     try {
       const query = `SELECT * FROM MENU_ITEMS WHERE restaurant_id=${id}`;
