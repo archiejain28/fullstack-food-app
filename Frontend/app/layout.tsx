@@ -6,6 +6,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "FoodApp",
   description: "Order food from your favorite restaurants",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/apple-icon.svg",
+  },
 };
 
 export default function RootLayout({
